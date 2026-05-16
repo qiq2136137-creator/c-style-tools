@@ -10,6 +10,7 @@ import os
 import sys
 import glob
 import re
+import chardet
 
 # 添加脚本目录到路径
 sys.path.insert(0, os.path.dirname(__file__))
@@ -19,6 +20,18 @@ from commentator import DoxygenCommentator
 from writer import CommentWriter
 from exporter import DocExporter
 from models import ProjectInfo, FileInfo
+
+
+def detect_encoding(file_path: str) -> str:
+    """检测文件编码"""
+    with open(file_path, "rb") as f:
+        raw = f.read()
+    result = chardet.detect(raw)
+    encoding = result.get("encoding", "utf-8") or "utf-8"
+    # 常见中文编码修正
+    if encoding.lower() in ("gb2312", "gbk", "gb18030"):
+        return "gb18030"
+    return encoding
 
 
 def find_c_files(path: str) -> list:
@@ -81,7 +94,8 @@ def generate_comments_for_file(
     writer: CommentWriter
 ) -> tuple:
     """为单个文件生成注释"""
-    with open(file_path, "r", encoding="utf-8", errors="replace") as f:
+    encoding = detect_encoding(file_path)
+    with open(file_path, "r", encoding=encoding, errors="replace") as f:
         original_source = f.read()
 
     file_info = parser.parse_file(file_path)
@@ -115,7 +129,7 @@ def generate_comments_for_file(
     result = writer.insert_comments(original_source, file_info, file_comments)
     result = writer.insert_file_header(result, file_comment)
 
-    with open(file_path, "w", encoding="utf-8") as f:
+    with open(file_path, "w", encoding=encoding) as f:
         f.write(result)
 
     return file_info, comment_count
@@ -151,8 +165,9 @@ def main():
         project = ProjectInfo(project_name=args.project_name)
         for fp in c_files:
             file_info = c_parser.parse_file(fp)
+            enc = detect_encoding(fp)
             _extract_existing_comments(
-                open(fp, encoding="utf-8", errors="replace").read(), file_info
+                open(fp, encoding=enc, errors="replace").read(), file_info
             )
             project.files.append(file_info)
 

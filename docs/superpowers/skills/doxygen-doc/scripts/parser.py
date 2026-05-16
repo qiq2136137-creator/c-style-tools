@@ -56,6 +56,18 @@ class CParser:
                 if fn:
                     file_info.functions.append(fn)
 
+            elif child.type == "declaration":
+                # 区分函数声明和全局变量声明
+                func_decl = _find_child(child, "function_declarator")
+                if func_decl:
+                    fn = self._parse_function(child, source_code)
+                    if fn:
+                        file_info.functions.append(fn)
+                else:
+                    g = self._parse_global_var(child, source_code)
+                    if g:
+                        file_info.globals.append(g)
+
             elif child.type in ("struct_specifier", "union_specifier"):
                 s = self._parse_struct(child, source_code)
                 if s:
@@ -83,11 +95,6 @@ class CParser:
                 m = self._parse_preproc_def(child, source_code, is_function_like=True)
                 if m:
                     file_info.macros.append(m)
-
-            elif child.type == "declaration":
-                g = self._parse_global_var(child, source_code)
-                if g:
-                    file_info.globals.append(g)
 
         return file_info
 
