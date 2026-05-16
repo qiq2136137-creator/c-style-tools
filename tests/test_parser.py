@@ -96,3 +96,16 @@ def test_parse_named_struct():
     assert len(result.structs) == 1
     assert result.structs[0].name == "Point"
     assert result.structs[0].kind == "struct"
+
+
+def test_parse_function_declaration():
+    """头文件中的函数声明"""
+    code = b'void KEY_Init(void);\nint read_key(uint8_t pin);\n'
+    parser = CParser()
+    result = parser.parse(code, "test.h")
+    assert len(result.functions) == 2
+    assert result.functions[0].name == "KEY_Init"
+    assert result.functions[0].return_type == "void"
+    assert result.functions[1].name == "read_key"
+    assert result.functions[1].return_type == "int"
+    assert result.functions[1].params[0].name == "pin"
