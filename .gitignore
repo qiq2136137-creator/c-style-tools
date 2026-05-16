@@ -1,0 +1,39 @@
+# 敏感文件
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.p8
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# C/C++ 编译产物
+*.o
+*.obj
+*.exe
+*.out
+*.so
+*.dll
+*.dylib
+*.a
+*.lib
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 系统
+.DS_Store
+Thumbs.db
